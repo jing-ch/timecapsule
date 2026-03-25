@@ -12,6 +12,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TimeCapsule">
         <activity
+            android:name=".auth.RegisterActivity"
+            android:exported="false" />
+        <activity
+            android:name=".auth.LoginActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
