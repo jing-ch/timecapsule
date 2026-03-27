@@ -1,24 +1,55 @@
 package edu.northeastern.timecapsule;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.appcompat.widget.Toolbar;
+
+import com.google.firebase.auth.FirebaseAuth;
+
+import edu.northeastern.timecapsule.auth.LoginActivity;
 
 public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        // Session guard: redirect to login if not authenticated
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            goToLogin();
+            return;
+        }
+
+        // TODO: B will replace this with the capsule list fragment
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_logout) {
+            FirebaseAuth.getInstance().signOut();
+            goToLogin();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void goToLogin() {
+        startActivity(new Intent(this, LoginActivity.class));
+        finish();
     }
 }

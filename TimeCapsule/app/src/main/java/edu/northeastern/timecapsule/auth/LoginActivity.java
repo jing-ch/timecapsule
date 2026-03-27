@@ -1,27 +1,59 @@
 package edu.northeastern.timecapsule.auth;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 
-import edu.northeastern.timecapsule.R;
+import edu.northeastern.timecapsule.MainActivity;
+import edu.northeastern.timecapsule.databinding.ActivityLoginBinding;
 
 public class LoginActivity extends AppCompatActivity {
 
-    // todo: Jinghan will implement this
+    private ActivityLoginBinding binding;
+    private AuthViewModel viewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_login);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+        binding = ActivityLoginBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        viewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+
+        // If already logged in, skip to main
+        if (viewModel.getCurrentUser() != null) {
+            goToMain();
+            return;
+        }
+
+        viewModel.currentUser.observe(this, user -> {
+            if (user != null) goToMain();
         });
+
+        viewModel.errorMessage.observe(this, msg ->
+                Toast.makeText(this, msg, Toast.LENGTH_LONG).show());
+
+        binding.btnLogin.setOnClickListener(v -> {
+            String email = binding.etEmail.getText().toString().trim();
+            String password = binding.etPassword.getText().toString();
+
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            viewModel.login(email, password);
+        });
+
+        binding.tvGoToRegister.setOnClickListener(v ->
+                startActivity(new Intent(this, RegisterActivity.class)));
+    }
+
+    private void goToMain() {
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
     }
 }
