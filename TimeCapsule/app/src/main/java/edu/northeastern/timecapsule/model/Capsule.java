@@ -3,6 +3,8 @@ package edu.northeastern.timecapsule.model;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentId;
 
+import java.util.List;
+
 /**
  * Represents a Time Capsule document in Firestore.
  * Field names match the agreed Firestore document structure.
@@ -18,8 +20,8 @@ public class Capsule {
     private String userId;
     private String title;
     private String content;
-    private String mediaUrl;    // nullable
-    private String mediaType;   // "image" or "video", nullable
+    private List<String> mediaUrls;   // nullable
+    private List<String> mediaTypes;  // each entry is "image" or "video", nullable
     private String thumbnailUrl; // video only, nullable
     private String locationName; // nullable
     private Timestamp unlockTime;
@@ -42,11 +44,11 @@ public class Capsule {
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
 
-    public String getMediaUrl() { return mediaUrl; }
-    public void setMediaUrl(String mediaUrl) { this.mediaUrl = mediaUrl; }
+    public List<String> getMediaUrls() { return mediaUrls; }
+    public void setMediaUrls(List<String> mediaUrls) { this.mediaUrls = mediaUrls; }
 
-    public String getMediaType() { return mediaType; }
-    public void setMediaType(String mediaType) { this.mediaType = mediaType; }
+    public List<String> getMediaTypes() { return mediaTypes; }
+    public void setMediaTypes(List<String> mediaTypes) { this.mediaTypes = mediaTypes; }
 
     public String getThumbnailUrl() { return thumbnailUrl; }
     public void setThumbnailUrl(String thumbnailUrl) { this.thumbnailUrl = thumbnailUrl; }

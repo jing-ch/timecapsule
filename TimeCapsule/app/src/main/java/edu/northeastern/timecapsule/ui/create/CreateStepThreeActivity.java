@@ -218,8 +218,8 @@ public class CreateStepThreeActivity extends AppCompatActivity {
         capsule.setCreatedAt(Timestamp.now());
         capsule.setUnlocked(false);
         // media upload handled in a later task
-        capsule.setMediaUrl(null);
-        capsule.setMediaType(null);
+        capsule.setMediaUrls(null);
+        capsule.setMediaTypes(null);
 
         viewModel.saveCapsule(capsule);
     }
