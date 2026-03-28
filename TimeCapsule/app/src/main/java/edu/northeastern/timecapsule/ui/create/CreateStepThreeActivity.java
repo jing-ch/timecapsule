@@ -1,5 +1,6 @@
 package edu.northeastern.timecapsule.ui.create;
 
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
@@ -12,7 +13,16 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.datepicker.CalendarConstraints;
+import com.google.android.material.datepicker.DateValidatorPointForward;
+import com.google.android.material.datepicker.MaterialDatePicker;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import edu.northeastern.timecapsule.R;
 import edu.northeastern.timecapsule.viewmodel.CreateCapsuleViewModel;
@@ -23,10 +33,14 @@ import edu.northeastern.timecapsule.viewmodel.CreateCapsuleViewModel;
 public class CreateStepThreeActivity extends AppCompatActivity {
 
     private ImageButton btnBack;
+    private LinearLayout layoutDateTime;
     private LinearLayout btnPrivate;
     private LinearLayout btnPublic;
     private Button btnCreate;
     private TextView tvDateTime;
+
+    /** Stores the user-selected unlock date and time */
+    private Date selectedUnlockDate = null;
 
     /** ViewModel for capsule creation */
     private CreateCapsuleViewModel viewModel;
@@ -74,6 +88,7 @@ public class CreateStepThreeActivity extends AppCompatActivity {
     /** Binds UI elements from XML */
     private void initViews() {
         btnBack = findViewById(R.id.btnBack);
+        layoutDateTime = findViewById(R.id.layoutDateTime);
         btnPrivate = findViewById(R.id.btnPrivate);
         btnPublic = findViewById(R.id.btnPublic);
         btnCreate = findViewById(R.id.btnCreate);
@@ -101,8 +116,42 @@ public class CreateStepThreeActivity extends AppCompatActivity {
 
         btnCreate.setOnClickListener(v -> createCapsule());
 
-        // TODO: open date/time picker when date field is clicked
-        // TODO: update tvDateTime with selected unlock date and time
+        layoutDateTime.setOnClickListener(v -> openDateTimePicker());
+    }
+
+    /** Opens MaterialDatePicker, then TimePickerDialog to select unlock date and time */
+    private void openDateTimePicker() {
+        CalendarConstraints constraints = new CalendarConstraints.Builder()
+                .setValidator(DateValidatorPointForward.now())
+                .build();
+
+        MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText("Select unlock date")
+                .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                .setCalendarConstraints(constraints)
+                .build();
+
+        datePicker.addOnPositiveButtonClickListener(dateMillis -> {
+            Calendar utcCal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            utcCal.setTimeInMillis(dateMillis);
+            int year = utcCal.get(Calendar.YEAR);
+            int month = utcCal.get(Calendar.MONTH);
+            int day = utcCal.get(Calendar.DAY_OF_MONTH);
+
+            TimePickerDialog timePicker = new TimePickerDialog(this, (view, hourOfDay, minute) -> {
+                Calendar selected = Calendar.getInstance();
+                selected.set(year, month, day, hourOfDay, minute, 0);
+                selected.set(Calendar.MILLISECOND, 0);
+                selectedUnlockDate = selected.getTime();
+
+                SimpleDateFormat fmt = new SimpleDateFormat("MMM d, yyyy 'at' h:mm a", Locale.getDefault());
+                tvDateTime.setText(fmt.format(selectedUnlockDate));
+            }, 12, 0, false);
+
+            timePicker.show();
+        });
+
+        datePicker.show(getSupportFragmentManager(), "DATE_PICKER");
     }
 
     /** Observes ViewModel state */
