@@ -2,6 +2,7 @@ package edu.northeastern.timecapsule.ui.create;
 
 import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -186,17 +187,14 @@ public class CreateStepThreeActivity extends AppCompatActivity {
     /** Updates selected privacy UI */
     private void updatePrivacySelection() {
         if (isPrivate) {
-            btnPrivate.setAlpha(1.0f);
-            btnPublic.setAlpha(0.6f);
-            Toast.makeText(this, "Private selected", Toast.LENGTH_SHORT).show();
+            btnPrivate.setBackgroundColor(Color.parseColor("#E6D9FF"));
+            btnPublic.setBackgroundColor(Color.WHITE);
         } else {
-            btnPrivate.setAlpha(0.6f);
-            btnPublic.setAlpha(1.0f);
-            Toast.makeText(this, "Public selected", Toast.LENGTH_SHORT).show();
+            btnPrivate.setBackgroundColor(Color.WHITE);
+            btnPublic.setBackgroundColor(Color.parseColor("#E6D9FF"));
         }
-
-        // TODO: replace alpha-based selection with a better selected-state UI
     }
+
 
     /** Validates input and submits capsule data */
     private void createCapsule() {
