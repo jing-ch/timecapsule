@@ -1,7 +1,7 @@
 package edu.northeastern.timecapsule.viewmodel;
 
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.MediatorLiveData;
 
 import edu.northeastern.timecapsule.model.Capsule;
 
@@ -11,7 +11,7 @@ import edu.northeastern.timecapsule.model.Capsule;
 public class CreateCapsuleViewModel extends BaseViewModel {
 
     /** Save result state */
-    private final MutableLiveData<Boolean> saveResult = new MutableLiveData<>();
+    private final MediatorLiveData<Boolean> saveResult = new MediatorLiveData<>();
 
     /** Returns save result */
     public LiveData<Boolean> getSaveResult() {
@@ -25,11 +25,11 @@ public class CreateCapsuleViewModel extends BaseViewModel {
             return;
         }
 
-        repo.saveCapsule(capsule).observeForever(success -> {
-            if (success != null && success) {
-                saveResult.setValue(true);
-            } else {
-                saveResult.setValue(false);
+        LiveData<Boolean> source = repo.saveCapsule(capsule);
+        saveResult.addSource(source, success -> {
+            saveResult.setValue(success);
+            saveResult.removeSource(source);
+            if (success == null || !success) {
                 errorMessage.setValue("Failed to save capsule");
             }
         });
