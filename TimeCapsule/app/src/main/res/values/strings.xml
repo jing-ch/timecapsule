@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">Time Capsule</string>
+    <string name="create_a_capsule">Create a Capsule</string>
+    <string name="plus_photos">+</string>
+    <string name="add_photos_videos">Add photos/videos</string>
+    <string name="title">Title</string>
+    <string name="enter_a_title">Enter a title</string>
+    <string name="next_step_one">Next Step</string>
+    <string name="message">Message</string>
+    <string name="write_something_for_your_future">Write something for your future...</string>
+    <string name="_0_10000">0/10000</string>
+    <string name="location_optional">Location (optional)</string>
+    <string name="enter_a_location">Enter a location</string>
+    <string name="remove">Remove</string>
+    <string name="unlock_date_and_time">Unlock Date and Time</string>
+    <string name="time">March 1st, 2027 20:00 PM</string>
+    <string name="privacy_settings">Privacy Settings</string>
+    <string name="private_btn">private</string>
+    <string name="public_btn">Public</string>
+    <string name="create">+ Create</string>
+    <string name="photos_videos">Photos/Videos</string>
+    <string name="create_capsule">+ Create Capsule</string>
 </resources>
