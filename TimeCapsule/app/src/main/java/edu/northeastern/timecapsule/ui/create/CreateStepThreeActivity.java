@@ -24,7 +24,11 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
+
 import edu.northeastern.timecapsule.R;
+import edu.northeastern.timecapsule.model.Capsule;
 import edu.northeastern.timecapsule.viewmodel.CreateCapsuleViewModel;
 
 /**
@@ -197,21 +201,26 @@ public class CreateStepThreeActivity extends AppCompatActivity {
             return;
         }
 
-        String unlockDateTime = "";
-        if (tvDateTime != null) {
-            unlockDateTime = tvDateTime.getText().toString().trim();
+        if (selectedUnlockDate == null) {
+            viewModel.errorMessage.setValue("Please select an unlock date and time");
+            return;
         }
 
-        Toast.makeText(
-                this,
-                "Creating capsule...",
-                Toast.LENGTH_SHORT
-        ).show();
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        // TODO: create Capsule object using your Capsule model fields
-        // TODO: set title, message, location, privacy, unlockDateTime, and media URLs
-        // TODO: set userId from FirebaseAuth
-        // TODO: set createdAt timestamp
-        // TODO: call viewModel.saveCapsule(capsule)
+        Capsule capsule = new Capsule();
+        capsule.setUserId(userId);
+        capsule.setTitle(title);
+        capsule.setContent(message);
+        capsule.setLocationName((location != null && !location.isEmpty()) ? location : null);
+        capsule.setPublic(!isPrivate);
+        capsule.setUnlockTime(new Timestamp(selectedUnlockDate));
+        capsule.setCreatedAt(Timestamp.now());
+        capsule.setUnlocked(false);
+        // media upload handled in a later task
+        capsule.setMediaUrl(null);
+        capsule.setMediaType(null);
+
+        viewModel.saveCapsule(capsule);
     }
 }
