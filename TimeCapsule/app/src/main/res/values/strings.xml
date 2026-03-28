@@ -15,9 +15,9 @@
     <string name="unlock_date_and_time">Unlock Date and Time</string>
     <string name="time">March 1st, 2027 20:00 PM</string>
     <string name="privacy_settings">Privacy Settings</string>
-    <string name="private">Private</string>
     <string name="private_btn">private</string>
     <string name="public_btn">Public</string>
     <string name="create">+ Create</string>
     <string name="photos_videos">Photos/Videos</string>
+    <string name="create_capsule">+ Create Capsule</string>
 </resources>

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -11,6 +12,7 @@ import androidx.appcompat.widget.Toolbar;
 import com.google.firebase.auth.FirebaseAuth;
 
 import edu.northeastern.timecapsule.auth.LoginActivity;
+import edu.northeastern.timecapsule.ui.create.CreateStepOneActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,6 +32,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // TODO: B will replace this with the capsule list fragment
+
+        Button btnCreateCapsule = findViewById(R.id.btnCreateCapsule);
+
+        btnCreateCapsule.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, CreateStepOneActivity.class));
+        });
     }
 
     @Override
