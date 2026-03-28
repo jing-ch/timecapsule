@@ -17,15 +17,22 @@ import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
 
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.UUID;
 
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import edu.northeastern.timecapsule.R;
 import edu.northeastern.timecapsule.model.Capsule;
@@ -170,6 +177,8 @@ public class CreateStepThreeActivity extends AppCompatActivity {
             if (success != null && success) {
                 Toast.makeText(this, "Capsule created successfully", Toast.LENGTH_SHORT).show();
                 finish();
+            } else if (success != null) {
+                btnCreate.setEnabled(true);
             }
         });
     }
@@ -217,10 +226,67 @@ public class CreateStepThreeActivity extends AppCompatActivity {
         capsule.setUnlockTime(new Timestamp(selectedUnlockDate));
         capsule.setCreatedAt(Timestamp.now());
         capsule.setUnlocked(false);
-        // media upload handled in a later task
-        capsule.setMediaUrls(null);
-        capsule.setMediaTypes(null);
 
-        viewModel.saveCapsule(capsule);
+        if (mediaUris == null || mediaUris.isEmpty()) {
+            capsule.setMediaUrls(null);
+            capsule.setMediaTypes(null);
+            viewModel.saveCapsule(capsule);
+        } else {
+            uploadMediaAndSave(capsule);
+        }
+    }
+
+    /** Uploads all selected media to Firebase Storage, then saves the capsule */
+    private void uploadMediaAndSave(Capsule capsule) {
+        btnCreate.setEnabled(false);
+
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        String userId = capsule.getUserId();
+
+        List<Task<android.net.Uri>> uploadTasks = new ArrayList<>();
+        List<String> mimeTypes = new ArrayList<>();
+
+        for (String uriString : mediaUris) {
+            android.net.Uri uri = android.net.Uri.parse(uriString);
+            String mimeType = getContentResolver().getType(uri);
+            if (mimeType == null) mimeType = "application/octet-stream";
+            mimeTypes.add(mimeType);
+
+            String extension = mimeType.startsWith("image") ? ".jpg" : ".mp4";
+            String filename = UUID.randomUUID().toString() + extension;
+            StorageReference ref = storage.getReference()
+                    .child("media/" + userId + "/" + filename);
+
+            try {
+                InputStream stream = getContentResolver().openInputStream(uri);
+                Task<android.net.Uri> uploadTask = ref.putStream(stream)
+                        .continueWithTask(task -> {
+                            if (!task.isSuccessful()) throw task.getException();
+                            return ref.getDownloadUrl();
+                        });
+                uploadTasks.add(uploadTask);
+            } catch (Exception e) {
+                btnCreate.setEnabled(true);
+                viewModel.errorMessage.setValue("Failed to read media file");
+                return;
+            }
+        }
+
+        Tasks.whenAllSuccess(uploadTasks)
+                .addOnSuccessListener(results -> {
+                    List<String> downloadUrls = new ArrayList<>();
+                    List<String> types = new ArrayList<>();
+                    for (int i = 0; i < results.size(); i++) {
+                        downloadUrls.add(results.get(i).toString());
+                        types.add(mimeTypes.get(i).startsWith("image") ? "image" : "video");
+                    }
+                    capsule.setMediaUrls(downloadUrls);
+                    capsule.setMediaTypes(types);
+                    viewModel.saveCapsule(capsule);
+                })
+                .addOnFailureListener(e -> {
+                    btnCreate.setEnabled(true);
+                    viewModel.errorMessage.setValue("Failed to upload media");
+                });
     }
 }
