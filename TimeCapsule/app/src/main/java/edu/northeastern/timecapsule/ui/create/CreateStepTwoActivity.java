@@ -2,8 +2,10 @@ package edu.northeastern.timecapsule.ui.create;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.ScrollingMovementMethod;
@@ -13,6 +15,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
@@ -36,6 +39,9 @@ public class CreateStepTwoActivity extends AppCompatActivity {
 
     /** Media URIs passed from Step 1 */
     private ArrayList<String> mediaUris;
+
+    /** User-entered location, null if not set */
+    private String userLocation = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -70,7 +76,7 @@ public class CreateStepTwoActivity extends AppCompatActivity {
         btnNextStep = findViewById(R.id.btnNextStep);
     }
 
-    /** Configures scrolling behavior for the message box */
+    /** Configures scrolling behavior and input limits for the message box */
     @SuppressLint("ClickableViewAccessibility")
     private void setupMessageBox() {
         etMessage.setVerticalScrollBarEnabled(true);
@@ -82,8 +88,7 @@ public class CreateStepTwoActivity extends AppCompatActivity {
             return false;
         });
 
-        // TODO: add max length restriction if needed
-        // TODO: change counter color when near the limit
+        etMessage.setFilters(new InputFilter[]{new InputFilter.LengthFilter(1000)});
     }
 
     /** Sets up button and text listeners */
@@ -108,13 +113,29 @@ public class CreateStepTwoActivity extends AppCompatActivity {
         });
 
         tvLocation.setOnClickListener(v -> {
-            // TODO: open location picker or input dialog
-            // TODO: update the displayed location text
+            EditText input = new EditText(this);
+            input.setHint("e.g. Tokyo, Japan");
+            if (userLocation != null) input.setText(userLocation);
+
+            new AlertDialog.Builder(this)
+                    .setTitle("Enter location")
+                    .setView(input)
+                    .setPositiveButton("OK", (dialog, which) -> {
+                        String entered = input.getText().toString().trim();
+                        if (!entered.isEmpty()) {
+                            userLocation = entered;
+                            tvLocation.setText(userLocation);
+                            tvLocation.setTextColor(Color.parseColor("#444444"));
+                        }
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
         });
 
         tvRemove.setOnClickListener(v -> {
-            tvLocation.setText("");
-            // TODO: restore default placeholder text if needed
+            userLocation = null;
+            tvLocation.setText(R.string.enter_a_location);
+            tvLocation.setTextColor(Color.parseColor("#444444"));
         });
 
         btnNextStep.setOnClickListener(v -> goToStepThree());
@@ -123,14 +144,14 @@ public class CreateStepTwoActivity extends AppCompatActivity {
     /** Updates the message character counter */
     @SuppressLint("SetTextI18n")
     private void updateCharacterCount() {
-        String currentText = etMessage.getText().toString();
-        tvCount.setText(currentText.length() + "/10000");
+        int length = etMessage.getText().toString().length();
+        tvCount.setText(length + "/1000");
+        tvCount.setTextColor(length > 900 ? Color.RED : Color.parseColor("#C8C8C8"));
     }
 
     /** Validates input and navigates to Step 3 */
     private void goToStepThree() {
         String message = etMessage.getText().toString().trim();
-        String location = tvLocation.getText().toString().trim();
 
         if (TextUtils.isEmpty(message)) {
             etMessage.setError("Please enter a message");
@@ -142,7 +163,7 @@ public class CreateStepTwoActivity extends AppCompatActivity {
         intent.putExtra("capsule_title", title);
         intent.putStringArrayListExtra("capsule_media_uris", mediaUris);
         intent.putExtra("capsule_message", message);
-        intent.putExtra("capsule_location", location);
+        intent.putExtra("capsule_location", userLocation);
         startActivity(intent);
     }
 }
