@@ -10,11 +10,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.messaging.FirebaseMessaging;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import edu.northeastern.timecapsule.auth.LoginActivity;
 import edu.northeastern.timecapsule.ui.create.CreateStepOneActivity;
 
 public class MainActivity extends AppCompatActivity {
+
+    private final FirebaseAuth auth = FirebaseAuth.getInstance();
+    private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,10 +36,13 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         // Session guard: redirect to login if not authenticated
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+        FirebaseUser currentUser = auth.getCurrentUser();
+        if (currentUser == null) {
             goToLogin();
             return;
         }
+
+        syncFcmToken(currentUser);
 
         // TODO: B will replace this with the capsule list fragment
 
@@ -49,11 +62,27 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_logout) {
-            FirebaseAuth.getInstance().signOut();
+            auth.signOut();
             goToLogin();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void syncFcmToken(FirebaseUser user) {
+        FirebaseMessaging.getInstance().getToken()
+                .addOnSuccessListener(token -> {
+                    if (token == null || token.isEmpty()) {
+                        return;
+                    }
+
+                    Map<String, Object> updates = new HashMap<>();
+                    updates.put("fcmToken", token);
+
+                    firestore.collection("users")
+                            .document(user.getUid())
+                            .set(updates, SetOptions.merge());
+                });
     }
 
     private void goToLogin() {
