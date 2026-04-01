@@ -18,14 +18,14 @@ public class CreateCapsuleViewModel extends BaseViewModel {
         return saveResult;
     }
 
-    /** Saves a capsule through repository */
-    public void saveCapsule(Capsule capsule) {
+    /** Saves a capsule with a pre-generated ID through repository */
+    public void saveCapsuleWithId(Capsule capsule, String capsuleId) {
         if (capsule == null) {
             errorMessage.setValue("Capsule is null");
             return;
         }
 
-        LiveData<Boolean> source = repo.saveCapsule(capsule);
+        LiveData<Boolean> source = repo.saveCapsuleWithId(capsule, capsuleId);
         saveResult.addSource(source, success -> {
             saveResult.setValue(success);
             saveResult.removeSource(source);

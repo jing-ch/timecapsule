@@ -37,6 +37,7 @@ import com.google.firebase.storage.StorageReference;
 
 import edu.northeastern.timecapsule.R;
 import edu.northeastern.timecapsule.model.Capsule;
+import edu.northeastern.timecapsule.repository.CapsuleRepository;
 import edu.northeastern.timecapsule.viewmodel.CreateCapsuleViewModel;
 
 /**
@@ -225,17 +226,20 @@ public class CreateStepThreeActivity extends AppCompatActivity {
         capsule.setCreatedAt(Timestamp.now());
         capsule.setUnlocked(false);
 
+        String capsuleId = CapsuleRepository.getInstance().generateCapsuleId();
+        capsule.setCapsuleId(capsuleId);
+
         if (mediaUris == null || mediaUris.isEmpty()) {
             capsule.setMediaUrls(null);
             capsule.setMediaTypes(null);
-            viewModel.saveCapsule(capsule);
+            viewModel.saveCapsuleWithId(capsule, capsuleId);
         } else {
-            uploadMediaAndSave(capsule);
+            uploadMediaAndSave(capsule, capsuleId);
         }
     }
 
     /** Uploads all selected media to Firebase Storage, then saves the capsule */
-    private void uploadMediaAndSave(Capsule capsule) {
+    private void uploadMediaAndSave(Capsule capsule, String capsuleId) {
         btnCreate.setEnabled(false);
 
         FirebaseStorage storage = FirebaseStorage.getInstance();
@@ -253,7 +257,7 @@ public class CreateStepThreeActivity extends AppCompatActivity {
             String extension = mimeType.startsWith("image") ? ".jpg" : ".mp4";
             String filename = UUID.randomUUID().toString() + extension;
             StorageReference ref = storage.getReference()
-                    .child("media/" + userId + "/" + filename);
+                    .child("media/" + userId + "/" + capsuleId + "/" + filename);
 
             try {
                 InputStream stream = getContentResolver().openInputStream(uri);
@@ -280,7 +284,7 @@ public class CreateStepThreeActivity extends AppCompatActivity {
                     }
                     capsule.setMediaUrls(downloadUrls);
                     capsule.setMediaTypes(types);
-                    viewModel.saveCapsule(capsule);
+                    viewModel.saveCapsuleWithId(capsule, capsuleId);
                 })
                 .addOnFailureListener(e -> {
                     btnCreate.setEnabled(true);

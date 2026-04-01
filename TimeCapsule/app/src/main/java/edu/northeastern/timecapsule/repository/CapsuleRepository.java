@@ -30,7 +30,8 @@ import edu.northeastern.timecapsule.model.Capsule;
  * WHAT'S AVAILABLE:
  *   fetchUserCapsules(userId)  -> Teammate B, this is yours -- loads the capsule list
  *   deleteCapsule(capsuleId)   -> Teammate B, this is yours -- for the delete dialog
- *   saveCapsule(capsule)       -> Teammate C, this is yours -- submits the creation form
+ *   generateCapsuleId()                      -> Teammate C, call this first to get an ID
+ *   saveCapsuleWithId(capsule, capsuleId)    -> Teammate C, this is yours -- submits the creation form
  */
 public class CapsuleRepository {
 
@@ -70,17 +71,28 @@ public class CapsuleRepository {
     }
 
     /**
-     * Teammate C -- use this to save a new capsule.
-     * Call this at the end of the 3-step wizard. Returns true on success, false on failure.
-     *
-     * @param capsule  a fully filled Capsule object (use setters to populate all fields first)
+     * Teammate C -- call this before uploading media to get a capsule ID in advance.
+     * Use the returned ID in the Storage path, then pass it to saveCapsuleWithId().
      */
-    public LiveData<Boolean> saveCapsule(Capsule capsule) {
+    public String generateCapsuleId() {
+        return db.collection(COLLECTION).document().getId();
+    }
+
+    /**
+     * Teammate C -- use this to save a new capsule with a pre-generated ID.
+     * Call generateCapsuleId() first to get the ID, use it in the Storage path,
+     * then call this method to save the capsule. Returns true on success, false on failure.
+     *
+     * @param capsule    a fully filled Capsule object (use setters to populate all fields first)
+     * @param capsuleId  the ID returned by generateCapsuleId()
+     */
+    public LiveData<Boolean> saveCapsuleWithId(Capsule capsule, String capsuleId) {
         MutableLiveData<Boolean> result = new MutableLiveData<>();
 
         db.collection(COLLECTION)
-                .add(capsule)
-                .addOnSuccessListener(ref -> result.setValue(true))
+                .document(capsuleId)
+                .set(capsule)
+                .addOnSuccessListener(unused -> result.setValue(true))
                 .addOnFailureListener(e -> result.setValue(false));
 
         return result;
