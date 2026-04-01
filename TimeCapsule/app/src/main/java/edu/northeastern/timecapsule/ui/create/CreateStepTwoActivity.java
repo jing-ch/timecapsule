@@ -9,11 +9,13 @@ import android.text.InputFilter;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.ScrollingMovementMethod;
+import android.widget.Toast;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 
 import edu.northeastern.timecapsule.R;
+import edu.northeastern.timecapsule.utils.LocationHelper;
 
 /**
  * Step 2: collects message and location input.
@@ -33,6 +36,7 @@ public class CreateStepTwoActivity extends AppCompatActivity {
     private TextView tvLocation;
     private TextView tvRemove;
     private Button btnNextStep;
+    private LocationHelper locationHelper;
 
     /** Title passed from Step 1 */
     private String title;
@@ -50,6 +54,7 @@ public class CreateStepTwoActivity extends AppCompatActivity {
 
         readIntentData();
         initViews();
+        initLocationHelper();
         setupMessageBox();
         setupListeners();
         updateCharacterCount();
@@ -74,6 +79,10 @@ public class CreateStepTwoActivity extends AppCompatActivity {
         tvLocation = findViewById(R.id.tvLocation);
         tvRemove = findViewById(R.id.tvRemove);
         btnNextStep = findViewById(R.id.btnNextStep);
+    }
+
+    private void initLocationHelper() {
+        locationHelper = new LocationHelper(this);
     }
 
     /** Configures scrolling behavior and input limits for the message box */
@@ -112,25 +121,7 @@ public class CreateStepTwoActivity extends AppCompatActivity {
             }
         });
 
-        tvLocation.setOnClickListener(v -> {
-            EditText input = new EditText(this);
-            input.setHint("e.g. Tokyo, Japan");
-            if (userLocation != null) input.setText(userLocation);
-
-            new AlertDialog.Builder(this)
-                    .setTitle("Enter location")
-                    .setView(input)
-                    .setPositiveButton("OK", (dialog, which) -> {
-                        String entered = input.getText().toString().trim();
-                        if (!entered.isEmpty()) {
-                            userLocation = entered;
-                            tvLocation.setText(userLocation);
-                            tvLocation.setTextColor(Color.parseColor("#444444"));
-                        }
-                    })
-                    .setNegativeButton("Cancel", null)
-                    .show();
-        });
+        tvLocation.setOnClickListener(v -> showLocationOptions());
 
         tvRemove.setOnClickListener(v -> {
             userLocation = null;
@@ -139,6 +130,61 @@ public class CreateStepTwoActivity extends AppCompatActivity {
         });
 
         btnNextStep.setOnClickListener(v -> goToStepThree());
+    }
+
+    private void showLocationOptions() {
+        String[] options = {"Use current location", "Enter manually"};
+
+        new AlertDialog.Builder(this)
+                .setTitle("Add location")
+                .setItems(options, (dialog, which) -> {
+                    if (which == 0) {
+                        useCurrentLocation();
+                    } else {
+                        showManualLocationInput();
+                    }
+                })
+                .show();
+    }
+
+    private void useCurrentLocation() {
+        locationHelper.fetchCurrentLocation(new LocationHelper.LocationResultCallback() {
+            @Override
+            public void onLocationResolved(@NonNull String locationText) {
+                updateLocation(locationText);
+            }
+
+            @Override
+            public void onLocationError(@NonNull String message) {
+                Toast.makeText(CreateStepTwoActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void showManualLocationInput() {
+        EditText input = new EditText(this);
+        input.setHint("e.g. Tokyo, Japan");
+        if (userLocation != null) {
+            input.setText(userLocation);
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle("Enter location")
+                .setView(input)
+                .setPositiveButton("OK", (dialog, which) -> {
+                    String entered = input.getText().toString().trim();
+                    if (!entered.isEmpty()) {
+                        updateLocation(entered);
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void updateLocation(String locationText) {
+        userLocation = locationText;
+        tvLocation.setText(userLocation);
+        tvLocation.setTextColor(Color.parseColor("#444444"));
     }
 
     /** Updates the message character counter */

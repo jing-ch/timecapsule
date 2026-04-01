@@ -23,6 +23,8 @@ import edu.northeastern.timecapsule.ui.create.CreateStepOneActivity;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final String EXTRA_CAPSULE_ID = "extra_capsule_id";
+
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
     private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
@@ -43,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         syncFcmToken(currentUser);
+        handleNotificationIntent(getIntent());
 
         // TODO: B will replace this with the capsule list fragment
 
@@ -69,6 +72,13 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleNotificationIntent(intent);
+    }
+
     private void syncFcmToken(FirebaseUser user) {
         FirebaseMessaging.getInstance().getToken()
                 .addOnSuccessListener(token -> {
@@ -83,6 +93,19 @@ public class MainActivity extends AppCompatActivity {
                             .document(user.getUid())
                             .set(updates, SetOptions.merge());
                 });
+    }
+
+    private void handleNotificationIntent(Intent intent) {
+        if (intent == null) {
+            return;
+        }
+
+        String capsuleId = intent.getStringExtra(EXTRA_CAPSULE_ID);
+        if (capsuleId == null || capsuleId.isEmpty()) {
+            return;
+        }
+
+        // Placeholder for teammate B's detail page navigation.
     }
 
     private void goToLogin() {

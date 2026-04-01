@@ -31,3 +31,7 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# Node / Firebase Functions
+node_modules/
+functions/node_modules/
