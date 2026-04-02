@@ -1,40 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp"
     tools:context=".MainActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="wrap_content"
         android:background="@android:color/transparent"
-        android:elevation="0dp" />
+        android:minHeight="?attr/actionBarSize"
+        app:title="" />
 
-    <!-- Placeholder text -->
     <TextView
+        android:id="@+id/tvPageTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="40dp"
-        android:text="Welcome to Time Capsule"
-        android:textSize="18sp" />
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        android:text="Time Capsule"
+        android:textSize="32sp"
+        android:textStyle="bold" />
 
-    <!-- TODO: B will replace this with the capsule list -->
-    <!-- Create Capsule Button -->
+    <EditText
+        android:id="@+id/etSearch"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="20dp"
+        android:background="@android:drawable/edit_text"
+        android:hint="Search my capsule..."
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewCapsules"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="12dp" />
+
     <Button
         android:id="@+id/btnCreateCapsule"
         android:layout_width="220dp"
-        android:layout_height="60dp"
+        android:layout_height="48dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="60dp"
-        android:backgroundTint="#D6CCF5"
-        android:text="@string/create_capsule"
+        android:layout_marginTop="16dp"
+        android:text="+ Add new capsule"
         android:textAllCaps="false"
-        android:textColor="#333333"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:textSize="16sp"
+        android:textColor="#4A3F8C"
+        android:backgroundTint="#D6C8FF" />
 
-    </LinearLayout>
+</LinearLayout>
