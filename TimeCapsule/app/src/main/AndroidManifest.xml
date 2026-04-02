@@ -22,6 +22,12 @@
             </intent-filter>
         </service>
         <activity
+            android:name=".ui.read.CapsuleListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.read.CapsuleDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.create.CreateStepThreeActivity"
             android:exported="false" />
         <activity
