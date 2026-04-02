@@ -70,6 +70,23 @@ public class CapsuleRepository {
         return liveData;
     }
 
+    public LiveData<Capsule> fetchCapsuleById(String capsuleId) {
+        MutableLiveData<Capsule> liveData = new MutableLiveData<>();
+
+        db.collection(COLLECTION)
+                .document(capsuleId)
+                .addSnapshotListener((snapshot, error) -> {
+                    if (error != null || snapshot == null || !snapshot.exists()) {
+                        liveData.setValue(null);
+                        return;
+                    }
+                    Capsule capsule = snapshot.toObject(Capsule.class);
+                    liveData.setValue(capsule);
+                });
+
+        return liveData;
+    }
+
     /**
      * Teammate C -- call this before uploading media to get a capsule ID in advance.
      * Use the returned ID in the Storage path, then pass it to saveCapsuleWithId().
