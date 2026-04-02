@@ -4,12 +4,17 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.squareup.picasso.Picasso;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -29,6 +34,10 @@ public class CreateStepOneActivity extends AppCompatActivity {
     private LinearLayout layoutMedia;
     private TextView tvAddMedia;
     private TextView tvAddIcon;
+    private FrameLayout layoutMediaPreview;
+    private ImageView ivThumbnail;
+    private TextView tvBadge;
+    private TextView tvTapToChange;
     private EditText etCapsuleTitle;
     private Button btnNextStep;
 
@@ -54,6 +63,10 @@ public class CreateStepOneActivity extends AppCompatActivity {
         layoutMedia = findViewById(R.id.layoutMedia);
         tvAddMedia = findViewById(R.id.tvAddMedia);
         tvAddIcon = findViewById(R.id.tvAddIcon);
+        layoutMediaPreview = findViewById(R.id.layoutMediaPreview);
+        ivThumbnail = findViewById(R.id.ivThumbnail);
+        tvBadge = findViewById(R.id.tvBadge);
+        tvTapToChange = findViewById(R.id.tvTapToChange);
         etCapsuleTitle = findViewById(R.id.etCapsuleTitle);
         btnNextStep = findViewById(R.id.btnNextStep);
     }
@@ -65,13 +78,32 @@ public class CreateStepOneActivity extends AppCompatActivity {
                 uris -> {
                     if (uris != null && !uris.isEmpty()) {
                         selectedMediaUris.clear();
-                        for (android.net.Uri uri : uris) {
+                        for (Uri uri : uris) {
                             selectedMediaUris.add(uri.toString());
                         }
 
                         int count = selectedMediaUris.size();
-                        tvAddIcon.setText("✓");
-                        tvAddMedia.setText(count + (count == 1 ? " file selected" : " files selected"));
+
+                        // hide empty state, show thumbnail + hint
+                        tvAddIcon.setVisibility(View.GONE);
+                        tvAddMedia.setVisibility(View.GONE);
+                        layoutMediaPreview.setVisibility(View.VISIBLE);
+                        tvTapToChange.setVisibility(View.VISIBLE);
+
+                        // load first image as thumbnail
+                        Picasso.get()
+                                .load(Uri.parse(selectedMediaUris.get(0)))
+                                .fit()
+                                .centerCrop()
+                                .into(ivThumbnail);
+
+                        // show badge only for multiple selections
+                        if (count > 1) {
+                            tvBadge.setText("x" + count);
+                            tvBadge.setVisibility(View.VISIBLE);
+                        } else {
+                            tvBadge.setVisibility(View.GONE);
+                        }
                     }
                 }
         );
