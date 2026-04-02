@@ -144,6 +144,10 @@ public class MainActivity extends AppCompatActivity {
         super.onNewIntent(intent);
         setIntent(intent);
         handleNotificationIntent(intent);
+
+        if (intent != null && intent.getBooleanExtra("refresh", false)) {
+            recreate();
+        }
     }
 
     private void syncFcmToken(FirebaseUser user) {
