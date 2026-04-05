@@ -84,7 +84,7 @@ public class CapsuleDetailActivity extends AppCompatActivity {
 
         btnBack.setOnClickListener(v -> finish());
 
-        String capsuleId = getIntent().getStringExtra("capsuleId");
+        String capsuleId = resolveCapsuleId();
 
         viewModel = new ViewModelProvider(this).get(CapsuleDetailViewModel.class);
         viewModel.loadCapsule(capsuleId);
@@ -97,6 +97,20 @@ public class CapsuleDetailActivity extends AppCompatActivity {
 
             bindCapsule(capsule);
         });
+    }
+
+    private String resolveCapsuleId() {
+        String capsuleId = getIntent().getStringExtra("capsuleId");
+        if (capsuleId != null && !capsuleId.isEmpty()) {
+            return capsuleId;
+        }
+
+        Uri data = getIntent().getData();
+        if (data == null) {
+            return null;
+        }
+
+        return data.getLastPathSegment();
     }
 
     private void bindCapsule(Capsule capsule) {

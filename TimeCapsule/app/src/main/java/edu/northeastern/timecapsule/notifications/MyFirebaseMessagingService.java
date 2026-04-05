@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
@@ -21,7 +22,6 @@ import com.google.firebase.messaging.RemoteMessage;
 import java.util.HashMap;
 import java.util.Map;
 
-import edu.northeastern.timecapsule.MainActivity;
 import edu.northeastern.timecapsule.R;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
@@ -116,8 +116,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     private PendingIntent buildNotificationIntent(String capsuleId) {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra(MainActivity.EXTRA_CAPSULE_ID, capsuleId);
+        Uri deepLinkUri = new Uri.Builder()
+                .scheme("timecapsule")
+                .authority("capsule")
+                .appendPath(capsuleId != null ? capsuleId : "")
+                .build();
+
+        Intent intent = new Intent(Intent.ACTION_VIEW, deepLinkUri);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         return PendingIntent.getActivity(
