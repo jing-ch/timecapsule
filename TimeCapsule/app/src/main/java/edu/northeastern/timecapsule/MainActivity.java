@@ -15,6 +15,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.material.chip.ChipGroup;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
@@ -135,6 +137,16 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {}
+        });
+
+        ChipGroup chipGroupFilter = findViewById(R.id.chipGroupFilter);
+        chipGroupFilter.check(R.id.chipAll);
+        chipGroupFilter.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            if (checkedIds.isEmpty()) return;
+            int id = checkedIds.get(0);
+            if (id == R.id.chipAll) viewModel.filterByStatus("all");
+            else if (id == R.id.chipLocked) viewModel.filterByStatus("locked");
+            else if (id == R.id.chipUnlocked) viewModel.filterByStatus("unlocked");
         });
 
         btnCreateCapsule.setOnClickListener(v -> {
