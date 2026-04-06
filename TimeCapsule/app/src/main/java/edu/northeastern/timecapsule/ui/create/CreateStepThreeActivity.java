@@ -10,6 +10,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.airbnb.lottie.LottieAnimationView;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -51,6 +53,7 @@ public class CreateStepThreeActivity extends AppCompatActivity {
     private LinearLayout btnPublic;
     private Button btnCreate;
     private TextView tvDateTime;
+    private LottieAnimationView capsuleSpinner;
 
     /** Stores the user-selected unlock date and time */
     private Date selectedUnlockDate = null;
@@ -106,6 +109,7 @@ public class CreateStepThreeActivity extends AppCompatActivity {
         btnPublic = findViewById(R.id.btnPublic);
         btnCreate = findViewById(R.id.btnCreate);
         tvDateTime = findViewById(R.id.tvDateTime);
+        capsuleSpinner = findViewById(R.id.capsuleSpinner);
     }
 
     /** Initializes ViewModel */
@@ -184,7 +188,10 @@ public class CreateStepThreeActivity extends AppCompatActivity {
                 startActivity(intent);
                 finish();
             } else if (success != null) {
+                capsuleSpinner.cancelAnimation();
+                capsuleSpinner.setVisibility(android.view.View.GONE);
                 btnCreate.setEnabled(true);
+                btnCreate.setText(R.string.create);
             }
         });
     }
@@ -217,6 +224,11 @@ public class CreateStepThreeActivity extends AppCompatActivity {
             viewModel.errorMessage.setValue("Please select an unlock date and time");
             return;
         }
+
+        btnCreate.setEnabled(false);
+        btnCreate.setText("Creating...");
+        capsuleSpinner.setVisibility(android.view.View.VISIBLE);
+        capsuleSpinner.playAnimation();
 
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 

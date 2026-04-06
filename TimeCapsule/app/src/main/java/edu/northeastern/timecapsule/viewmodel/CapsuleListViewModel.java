@@ -3,9 +3,11 @@ package edu.northeastern.timecapsule.viewmodel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import edu.northeastern.timecapsule.model.Capsule;
@@ -39,20 +41,38 @@ public class CapsuleListViewModel extends BaseViewModel {
         filteredCapsules.setValue(originalCapsules);
     }
 
-    public void filterByTitle(String query) {
-        if (query == null || query.trim().isEmpty()) {
-            filteredCapsules.setValue(originalCapsules);
-            return;
-        }
+    /** "all", "locked", or "unlocked" */
+    private String currentStatusFilter = "all";
+    private String currentTitleQuery = "";
 
+    public void filterByTitle(String query) {
+        currentTitleQuery = query == null ? "" : query.trim();
+        applyFilters();
+    }
+
+    public void filterByStatus(String status) {
+        currentStatusFilter = status == null ? "all" : status;
+        applyFilters();
+    }
+
+    private void applyFilters() {
         List<Capsule> result = new ArrayList<>();
-        String lower = query.toLowerCase().trim();
+        String lower = currentTitleQuery.toLowerCase();
+        Date now = new Date();
 
         for (Capsule capsule : originalCapsules) {
-            if (capsule.getTitle() != null &&
-                    capsule.getTitle().toLowerCase().contains(lower)) {
-                result.add(capsule);
+            // title filter
+            if (!lower.isEmpty() && (capsule.getTitle() == null ||
+                    !capsule.getTitle().toLowerCase().contains(lower))) {
+                continue;
             }
+            // status filter — use time comparison, same as CapsuleAdapter
+            Timestamp unlockTime = capsule.getUnlockTime();
+            boolean isEffectivelyUnlocked = unlockTime == null || !now.before(unlockTime.toDate());
+            if ("locked".equals(currentStatusFilter) && isEffectivelyUnlocked) continue;
+            if ("unlocked".equals(currentStatusFilter) && !isEffectivelyUnlocked) continue;
+
+            result.add(capsule);
         }
 
         filteredCapsules.setValue(result);

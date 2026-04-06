@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
@@ -12,6 +14,8 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.google.android.material.chip.ChipGroup;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -48,6 +52,14 @@ public class MainActivity extends AppCompatActivity {
 
     private CapsuleListViewModel viewModel;
     private CapsuleAdapter adapter;
+    private final Handler countdownHandler = new Handler(Looper.getMainLooper());
+    private final Runnable countdownRunnable = new Runnable() {
+        @Override
+        public void run() {
+            adapter.notifyDataSetChanged();
+            countdownHandler.postDelayed(this, 30_000);
+        }
+    };
     private final ActivityResultLauncher<String> notificationPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                 // No-op for now. If denied, the app simply won't display notifications.
@@ -127,11 +139,23 @@ public class MainActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {}
         });
 
+        ChipGroup chipGroupFilter = findViewById(R.id.chipGroupFilter);
+        chipGroupFilter.check(R.id.chipAll);
+        chipGroupFilter.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            if (checkedIds.isEmpty()) return;
+            int id = checkedIds.get(0);
+            if (id == R.id.chipAll) viewModel.filterByStatus("all");
+            else if (id == R.id.chipLocked) viewModel.filterByStatus("locked");
+            else if (id == R.id.chipUnlocked) viewModel.filterByStatus("unlocked");
+        });
+
         btnCreateCapsule.setOnClickListener(v -> {
             startActivity(new Intent(MainActivity.this, CreateStepOneActivity.class));
         });
 
         handleNotificationIntent(getIntent());
+
+        countdownHandler.postDelayed(countdownRunnable, 30_000);
     }
 
     @Override
@@ -233,6 +257,12 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        countdownHandler.removeCallbacks(countdownRunnable);
     }
 
     private void goToLogin() {

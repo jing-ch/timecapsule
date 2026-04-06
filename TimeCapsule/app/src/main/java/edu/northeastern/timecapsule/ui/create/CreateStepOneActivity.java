@@ -1,6 +1,8 @@
 package edu.northeastern.timecapsule.ui.create;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -90,12 +92,29 @@ public class CreateStepOneActivity extends AppCompatActivity {
                         layoutMediaPreview.setVisibility(View.VISIBLE);
                         tvTapToChange.setVisibility(View.VISIBLE);
 
-                        // load first image as thumbnail
-                        Picasso.get()
-                                .load(Uri.parse(selectedMediaUris.get(0)))
-                                .fit()
-                                .centerCrop()
-                                .into(ivThumbnail);
+                        // load first file as thumbnail (image or video)
+                        Uri firstUri = Uri.parse(selectedMediaUris.get(0));
+                        String mimeType = getContentResolver().getType(firstUri);
+                        if (mimeType != null && mimeType.startsWith("video")) {
+                            // extract first frame from video
+                            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                            try {
+                                retriever.setDataSource(this, firstUri);
+                                Bitmap frame = retriever.getFrameAtTime(0);
+                                ivThumbnail.setImageBitmap(frame);
+                                ivThumbnail.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                            } catch (Exception e) {
+                                ivThumbnail.setImageResource(android.R.drawable.ic_media_play);
+                            } finally {
+                                try { retriever.release(); } catch (Exception ignored) {}
+                            }
+                        } else {
+                            Picasso.get()
+                                    .load(firstUri)
+                                    .fit()
+                                    .centerCrop()
+                                    .into(ivThumbnail);
+                        }
 
                         // show badge only for multiple selections
                         if (count > 1) {

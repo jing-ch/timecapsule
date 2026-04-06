@@ -194,17 +194,35 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <Button
-            android:id="@+id/btnCreate"
-            android:layout_width="200dp"
-            android:layout_height="62dp"
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:backgroundTint="#E6D9FF"
-            android:text="@string/create"
-            android:textAllCaps="false"
-            android:textColor="#4B3F72"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/capsuleSpinner"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginBottom="4dp"
+                android:visibility="gone"
+                app:lottie_rawRes="@raw/hourglass"
+                app:lottie_autoPlay="true"
+                app:lottie_loop="true" />
+
+            <Button
+                android:id="@+id/btnCreate"
+                android:layout_width="200dp"
+                android:layout_height="62dp"
+                android:backgroundTint="#E6D9FF"
+                android:text="@string/create"
+                android:textAllCaps="false"
+                android:textColor="#4B3F72"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>

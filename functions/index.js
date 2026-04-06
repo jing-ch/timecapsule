@@ -19,7 +19,7 @@ async function processUnlockNotifications() {
   };
 
   const snapshot = await db.collection("capsules")
-      .where("isUnlocked", "==", false)
+      .where("unlocked", "==", false)
       .where("unlockTime", "<=", now)
       .get();
 
@@ -67,7 +67,7 @@ async function processUnlockNotifications() {
       });
 
       await doc.ref.update({
-        isUnlocked: true,
+        unlocked: true,
       });
 
       summary.notified += 1;
@@ -85,6 +85,7 @@ async function processUnlockNotifications() {
   return summary;
 }
 
-exports.sendUnlockNotifications = onSchedule("every 60 minutes", async () => {
+// Runs every minute to check for capsules ready to unlock
+exports.sendUnlockNotifications = onSchedule("every 1 minutes", async () => {
   return processUnlockNotifications();
 });
