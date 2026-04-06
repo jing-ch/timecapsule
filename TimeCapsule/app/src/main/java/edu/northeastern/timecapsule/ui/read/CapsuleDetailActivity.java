@@ -52,6 +52,7 @@ public class CapsuleDetailActivity extends AppCompatActivity {
     private VideoView detailVideo;
     private TextView noMediaText;
     private View videoPreviewLayout;
+    private View videoContainer;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private Runnable countdownRunnable;
@@ -81,6 +82,7 @@ public class CapsuleDetailActivity extends AppCompatActivity {
         detailVideo = findViewById(R.id.vvDetailVideo);
         noMediaText = findViewById(R.id.tvNoMedia);
         videoPreviewLayout = findViewById(R.id.layoutVideoPreview);
+        videoContainer = findViewById(R.id.layoutVideoContainer);
 
         btnBack.setOnClickListener(v -> finish());
 
@@ -176,7 +178,7 @@ public class CapsuleDetailActivity extends AppCompatActivity {
 
     private void bindMedia(Capsule capsule) {
         detailImage.setVisibility(View.GONE);
-        detailVideo.setVisibility(View.GONE);
+        videoContainer.setVisibility(View.GONE);
         noMediaText.setVisibility(View.GONE);
         videoPreviewLayout.setVisibility(View.GONE);
 
@@ -207,7 +209,7 @@ public class CapsuleDetailActivity extends AppCompatActivity {
 
             videoPreviewLayout.setOnClickListener(v -> {
                 videoPreviewLayout.setVisibility(View.GONE);
-                detailVideo.setVisibility(View.VISIBLE);
+                videoContainer.setVisibility(View.VISIBLE);
                 detailVideo.setVideoURI(Uri.parse(firstUrl));
                 detailVideo.start();
             });

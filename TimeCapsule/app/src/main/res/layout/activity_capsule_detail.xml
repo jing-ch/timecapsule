@@ -226,13 +226,20 @@
                     android:textSize="14sp" />
             </LinearLayout>
 
-            <VideoView
-                android:id="@+id/vvDetailVideo"
+            <FrameLayout
+                android:id="@+id/layoutVideoContainer"
                 android:layout_width="match_parent"
                 android:layout_height="220dp"
                 android:layout_marginTop="12dp"
                 android:background="@drawable/bg_capsule_card"
-                android:visibility="gone" />
+                android:visibility="gone">
+
+                <VideoView
+                    android:id="@+id/vvDetailVideo"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+            </FrameLayout>
 
             <TextView
                 android:id="@+id/tvNoMedia"
