@@ -4,13 +4,13 @@ import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.airbnb.lottie.LottieAnimationView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -53,7 +53,7 @@ public class CreateStepThreeActivity extends AppCompatActivity {
     private LinearLayout btnPublic;
     private Button btnCreate;
     private TextView tvDateTime;
-    private TextView capsuleSpinner;
+    private LottieAnimationView capsuleSpinner;
 
     /** Stores the user-selected unlock date and time */
     private Date selectedUnlockDate = null;
@@ -188,7 +188,7 @@ public class CreateStepThreeActivity extends AppCompatActivity {
                 startActivity(intent);
                 finish();
             } else if (success != null) {
-                capsuleSpinner.clearAnimation();
+                capsuleSpinner.cancelAnimation();
                 capsuleSpinner.setVisibility(android.view.View.GONE);
                 btnCreate.setEnabled(true);
                 btnCreate.setText(R.string.create);
@@ -228,8 +228,7 @@ public class CreateStepThreeActivity extends AppCompatActivity {
         btnCreate.setEnabled(false);
         btnCreate.setText("Creating...");
         capsuleSpinner.setVisibility(android.view.View.VISIBLE);
-        Animation spin = AnimationUtils.loadAnimation(this, R.anim.capsule_spin);
-        capsuleSpinner.startAnimation(spin);
+        capsuleSpinner.playAnimation();
 
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 

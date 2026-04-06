@@ -51,6 +51,8 @@ dependencies {
     implementation(libs.play.services.location)
     // Image loading
     implementation(libs.picasso)
+    // Lottie animation
+    implementation(libs.lottie)
     // MVVM
     implementation(libs.lifecycle.viewmodel)
     implementation(libs.lifecycle.livedata)

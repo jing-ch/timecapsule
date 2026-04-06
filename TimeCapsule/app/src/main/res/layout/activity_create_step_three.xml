@@ -201,14 +201,15 @@
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
-            <TextView
+            <com.airbnb.lottie.LottieAnimationView
                 android:id="@+id/capsuleSpinner"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="💊"
-                android:textSize="32sp"
-                android:visibility="gone" />
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginBottom="4dp"
+                android:visibility="gone"
+                app:lottie_rawRes="@raw/hourglass"
+                app:lottie_autoPlay="true"
+                app:lottie_loop="true" />
 
             <Button
                 android:id="@+id/btnCreate"
