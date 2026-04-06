@@ -40,6 +40,7 @@ import edu.northeastern.timecapsule.adapter.CapsuleAdapter;
 import edu.northeastern.timecapsule.auth.LoginActivity;
 import edu.northeastern.timecapsule.model.Capsule;
 import edu.northeastern.timecapsule.ui.create.CreateStepOneActivity;
+import edu.northeastern.timecapsule.ui.friends.FriendsActivity;
 import edu.northeastern.timecapsule.ui.read.CapsuleDetailActivity;
 import edu.northeastern.timecapsule.viewmodel.CapsuleListViewModel;
 
@@ -86,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
         syncFcmToken(currentUser);
 
         Button btnCreateCapsule = findViewById(R.id.btnCreateCapsule);
+        Button btnFriends = findViewById(R.id.btnFriends);
         EditText etSearch = findViewById(R.id.etSearch);
         RecyclerView recyclerView = findViewById(R.id.recyclerViewCapsules);
 
@@ -151,6 +153,10 @@ public class MainActivity extends AppCompatActivity {
 
         btnCreateCapsule.setOnClickListener(v -> {
             startActivity(new Intent(MainActivity.this, CreateStepOneActivity.class));
+        });
+
+        btnFriends.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, FriendsActivity.class));
         });
 
         handleNotificationIntent(getIntent());

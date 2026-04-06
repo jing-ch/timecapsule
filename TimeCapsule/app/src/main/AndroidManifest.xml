@@ -48,11 +48,13 @@
         <activity
             android:name=".ui.create.CreateStepOneActivity"
             android:exported="false" />
+        <activity android:name=".ui.friends.FriendsActivity"
+            android:exported="false" />
         <activity
             android:name=".CreateActivity"
             android:exported="false" />
         <activity
-            android:name=".auth.RegisterActivity"
+             android:name=".auth.RegisterActivity"
             android:exported="false" />
         <activity
             android:name=".auth.LoginActivity"
