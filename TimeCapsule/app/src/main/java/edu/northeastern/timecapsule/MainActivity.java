@@ -164,12 +164,21 @@ public class MainActivity extends AppCompatActivity {
     private void syncFcmToken(FirebaseUser user) {
         FirebaseMessaging.getInstance().getToken()
                 .addOnSuccessListener(token -> {
-                    if (token == null || token.isEmpty()) {
-                        return;
+                    Map<String, Object> updates = new HashMap<>();
+
+                    if (user.getEmail() != null) {
+                        updates.put("email", user.getEmail());
                     }
 
-                    Map<String, Object> updates = new HashMap<>();
-                    updates.put("fcmToken", token);
+                    String displayName = user.getDisplayName();
+                    if (displayName == null || displayName.trim().isEmpty()) {
+                        displayName = user.getEmail() != null ? user.getEmail() : "Unknown User";
+                    }
+                    updates.put("displayName", displayName);
+
+                    if (token != null && !token.isEmpty()) {
+                        updates.put("fcmToken", token);
+                    }
 
                     firestore.collection("users")
                             .document(user.getUid())
