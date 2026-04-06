@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
@@ -48,6 +50,14 @@ public class MainActivity extends AppCompatActivity {
 
     private CapsuleListViewModel viewModel;
     private CapsuleAdapter adapter;
+    private final Handler countdownHandler = new Handler(Looper.getMainLooper());
+    private final Runnable countdownRunnable = new Runnable() {
+        @Override
+        public void run() {
+            adapter.notifyDataSetChanged();
+            countdownHandler.postDelayed(this, 30_000);
+        }
+    };
     private final ActivityResultLauncher<String> notificationPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                 // No-op for now. If denied, the app simply won't display notifications.
@@ -132,6 +142,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         handleNotificationIntent(getIntent());
+
+        countdownHandler.postDelayed(countdownRunnable, 30_000);
     }
 
     @Override
@@ -224,6 +236,12 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        countdownHandler.removeCallbacks(countdownRunnable);
     }
 
     private void goToLogin() {
