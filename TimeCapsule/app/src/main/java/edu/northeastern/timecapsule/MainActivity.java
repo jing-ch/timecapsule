@@ -40,6 +40,7 @@ import edu.northeastern.timecapsule.adapter.CapsuleAdapter;
 import edu.northeastern.timecapsule.auth.LoginActivity;
 import edu.northeastern.timecapsule.model.Capsule;
 import edu.northeastern.timecapsule.ui.create.CreateStepOneActivity;
+import edu.northeastern.timecapsule.ui.friends.FriendsActivity;
 import edu.northeastern.timecapsule.ui.read.CapsuleDetailActivity;
 import edu.northeastern.timecapsule.viewmodel.CapsuleListViewModel;
 
@@ -86,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
         syncFcmToken(currentUser);
 
         Button btnCreateCapsule = findViewById(R.id.btnCreateCapsule);
+        Button btnFriends = findViewById(R.id.btnFriends);
         EditText etSearch = findViewById(R.id.etSearch);
         RecyclerView recyclerView = findViewById(R.id.recyclerViewCapsules);
 
@@ -153,6 +155,10 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(MainActivity.this, CreateStepOneActivity.class));
         });
 
+        btnFriends.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, FriendsActivity.class));
+        });
+
         handleNotificationIntent(getIntent());
 
         countdownHandler.postDelayed(countdownRunnable, 30_000);
@@ -188,12 +194,21 @@ public class MainActivity extends AppCompatActivity {
     private void syncFcmToken(FirebaseUser user) {
         FirebaseMessaging.getInstance().getToken()
                 .addOnSuccessListener(token -> {
-                    if (token == null || token.isEmpty()) {
-                        return;
+                    Map<String, Object> updates = new HashMap<>();
+
+                    if (user.getEmail() != null) {
+                        updates.put("email", user.getEmail());
                     }
 
-                    Map<String, Object> updates = new HashMap<>();
-                    updates.put("fcmToken", token);
+                    String displayName = user.getDisplayName();
+                    if (displayName == null || displayName.trim().isEmpty()) {
+                        displayName = user.getEmail() != null ? user.getEmail() : "Unknown User";
+                    }
+                    updates.put("displayName", displayName);
+
+                    if (token != null && !token.isEmpty()) {
+                        updates.put("fcmToken", token);
+                    }
 
                     firestore.collection("users")
                             .document(user.getUid())

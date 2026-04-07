@@ -1,9 +1,12 @@
 package edu.northeastern.timecapsule.ui.create;
 
+import android.app.AlertDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -15,31 +18,37 @@ import com.airbnb.lottie.LottieAnimationView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
-import com.google.firebase.Timestamp;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-
 import edu.northeastern.timecapsule.R;
+import edu.northeastern.timecapsule.adapter.FriendSelectionAdapter;
 import edu.northeastern.timecapsule.model.Capsule;
+import edu.northeastern.timecapsule.model.Friend;
 import edu.northeastern.timecapsule.repository.CapsuleRepository;
+import edu.northeastern.timecapsule.repository.FriendRepository;
 import edu.northeastern.timecapsule.viewmodel.CreateCapsuleViewModel;
 
 /**
@@ -53,6 +62,7 @@ public class CreateStepThreeActivity extends AppCompatActivity {
     private LinearLayout btnPublic;
     private Button btnCreate;
     private TextView tvDateTime;
+    private TextView tvSelectedFriends;
     private LottieAnimationView capsuleSpinner;
 
     /** Stores the user-selected unlock date and time */
@@ -76,6 +86,11 @@ public class CreateStepThreeActivity extends AppCompatActivity {
     /** Current privacy selection */
     private boolean isPrivate = true;
 
+    /** Selected friends for shared mode */
+    private final ArrayList<String> selectedFriendUids = new ArrayList<>();
+    private final ArrayList<String> selectedFriendNames = new ArrayList<>();
+    private final FriendRepository friendRepository = FriendRepository.getInstance();
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +101,7 @@ public class CreateStepThreeActivity extends AppCompatActivity {
         initViewModel();
         setupListeners();
         observeViewModel();
+        updateSelectedFriendsText();
     }
 
     /** Reads data from the previous step */
@@ -109,6 +125,7 @@ public class CreateStepThreeActivity extends AppCompatActivity {
         btnPublic = findViewById(R.id.btnPublic);
         btnCreate = findViewById(R.id.btnCreate);
         tvDateTime = findViewById(R.id.tvDateTime);
+        tvSelectedFriends = findViewById(R.id.tvSelectedFriends);
         capsuleSpinner = findViewById(R.id.capsuleSpinner);
     }
 
@@ -123,12 +140,16 @@ public class CreateStepThreeActivity extends AppCompatActivity {
 
         btnPrivate.setOnClickListener(v -> {
             isPrivate = true;
+            selectedFriendUids.clear();
+            selectedFriendNames.clear();
             updatePrivacySelection();
+            updateSelectedFriendsText();
         });
 
         btnPublic.setOnClickListener(v -> {
             isPrivate = false;
             updatePrivacySelection();
+            openFriendSelectionDialog();
         });
 
         btnCreate.setOnClickListener(v -> createCapsule());
@@ -189,7 +210,7 @@ public class CreateStepThreeActivity extends AppCompatActivity {
                 finish();
             } else if (success != null) {
                 capsuleSpinner.cancelAnimation();
-                capsuleSpinner.setVisibility(android.view.View.GONE);
+                capsuleSpinner.setVisibility(View.GONE);
                 btnCreate.setEnabled(true);
                 btnCreate.setText(R.string.create);
             }
@@ -207,6 +228,67 @@ public class CreateStepThreeActivity extends AppCompatActivity {
         }
     }
 
+    /** Updates selected friends summary text */
+    private void updateSelectedFriendsText() {
+        if (tvSelectedFriends == null) {
+            return;
+        }
+
+        if (isPrivate) {
+            tvSelectedFriends.setText("Private capsule");
+        } else if (selectedFriendNames.isEmpty()) {
+            tvSelectedFriends.setText("No friends selected");
+        } else {
+            tvSelectedFriends.setText("Selected: " + selectedFriendNames.size() + " friend(s)");
+        }
+    }
+
+    /** Opens friend selection dialog */
+    private void openFriendSelectionDialog() {
+        friendRepository.loadFriends(new FriendRepository.LoadFriendsCallback() {
+            @Override
+            public void onSuccess(List<Friend> friends) {
+                if (friends == null || friends.isEmpty()) {
+                    Toast.makeText(CreateStepThreeActivity.this,
+                            "No friends available. Add friends first.",
+                            Toast.LENGTH_SHORT).show();
+                    updateSelectedFriendsText();
+                    return;
+                }
+
+                View dialogView = LayoutInflater.from(CreateStepThreeActivity.this)
+                        .inflate(R.layout.dialog_select_friends, null);
+
+                RecyclerView recyclerView = dialogView.findViewById(R.id.recyclerViewSelectFriends);
+                recyclerView.setLayoutManager(new LinearLayoutManager(CreateStepThreeActivity.this));
+
+                Set<String> preselectedIds = new HashSet<>(selectedFriendUids);
+                FriendSelectionAdapter adapter = new FriendSelectionAdapter(friends, preselectedIds);
+                recyclerView.setAdapter(adapter);
+
+                new AlertDialog.Builder(CreateStepThreeActivity.this)
+                        .setTitle("Select Friends")
+                        .setView(dialogView)
+                        .setPositiveButton("OK", (dialog, which) -> {
+                            selectedFriendUids.clear();
+                            selectedFriendNames.clear();
+
+                            selectedFriendUids.addAll(adapter.getSelectedFriendUids());
+                            selectedFriendNames.addAll(adapter.getSelectedFriendNames());
+
+                            updateSelectedFriendsText();
+                        })
+                        .setNegativeButton("Cancel", (dialog, which) -> updateSelectedFriendsText())
+                        .show();
+            }
+
+            @Override
+            public void onFailure(String message) {
+                Toast.makeText(CreateStepThreeActivity.this, message, Toast.LENGTH_SHORT).show();
+                updateSelectedFriendsText();
+            }
+        });
+    }
 
     /** Validates input and submits capsule data */
     private void createCapsule() {
@@ -225,9 +307,14 @@ public class CreateStepThreeActivity extends AppCompatActivity {
             return;
         }
 
+        if (!isPrivate && selectedFriendUids.isEmpty()) {
+            viewModel.errorMessage.setValue("Please select at least one friend for shared capsule");
+            return;
+        }
+
         btnCreate.setEnabled(false);
         btnCreate.setText("Creating...");
-        capsuleSpinner.setVisibility(android.view.View.VISIBLE);
+        capsuleSpinner.setVisibility(View.VISIBLE);
         capsuleSpinner.playAnimation();
 
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -284,7 +371,10 @@ public class CreateStepThreeActivity extends AppCompatActivity {
                         });
                 uploadTasks.add(uploadTask);
             } catch (Exception e) {
+                capsuleSpinner.cancelAnimation();
+                capsuleSpinner.setVisibility(View.GONE);
                 btnCreate.setEnabled(true);
+                btnCreate.setText(R.string.create);
                 viewModel.errorMessage.setValue("Failed to read media file");
                 return;
             }
@@ -303,7 +393,10 @@ public class CreateStepThreeActivity extends AppCompatActivity {
                     viewModel.saveCapsuleWithId(capsule, capsuleId);
                 })
                 .addOnFailureListener(e -> {
+                    capsuleSpinner.cancelAnimation();
+                    capsuleSpinner.setVisibility(View.GONE);
                     btnCreate.setEnabled(true);
+                    btnCreate.setText(R.string.create);
                     viewModel.errorMessage.setValue("Failed to upload media");
                 });
     }
