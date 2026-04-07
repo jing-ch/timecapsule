@@ -66,6 +66,10 @@ public class Capsule {
     public List<String> getSharedWithUserIds() { return sharedWithUserIds; }
     public void setSharedWithUserIds(List<String> sharedWithUserIds) { this.sharedWithUserIds = sharedWithUserIds; }
 
+    public boolean isOwnedBy(String uid) {
+        return uid != null && uid.equals(userId);
+    }
+
     public boolean isUnlocked() { return isUnlocked; }
     public void setUnlocked(boolean isUnlocked) { this.isUnlocked = isUnlocked; }
 
