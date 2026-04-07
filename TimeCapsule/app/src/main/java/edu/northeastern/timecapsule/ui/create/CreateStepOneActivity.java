@@ -2,6 +2,9 @@ package edu.northeastern.timecapsule.ui.create;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
@@ -109,11 +112,31 @@ public class CreateStepOneActivity extends AppCompatActivity {
                                 try { retriever.release(); } catch (Exception ignored) {}
                             }
                         } else {
-                            Picasso.get()
-                                    .load(firstUri)
-                                    .fit()
-                                    .centerCrop()
-                                    .into(ivThumbnail);
+                            // Picasso ignores EXIF orientation, so we decode manually and
+                            // rotate the bitmap to match the EXIF tag. This prevents photos
+                            // from appearing rotated on devices (e.g. emulators) that store
+                            // orientation in EXIF rather than baking it into the pixel data.
+                            try (java.io.InputStream bitmapStream = getContentResolver().openInputStream(firstUri);
+                                 java.io.InputStream exifStream = getContentResolver().openInputStream(firstUri)) {
+                                Bitmap bitmap = BitmapFactory.decodeStream(bitmapStream);
+                                int rotation = 0;
+                                if (exifStream != null) {
+                                    ExifInterface exif = new ExifInterface(exifStream);
+                                    int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+                                    if (orientation == ExifInterface.ORIENTATION_ROTATE_90) rotation = 90;
+                                    else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) rotation = 180;
+                                    else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) rotation = 270;
+                                }
+                                if (rotation != 0 && bitmap != null) {
+                                    Matrix matrix = new Matrix();
+                                    matrix.postRotate(rotation);
+                                    bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                                }
+                                ivThumbnail.setImageBitmap(bitmap);
+                                ivThumbnail.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                            } catch (Exception e) {
+                                Picasso.get().load(firstUri).fit().centerCrop().into(ivThumbnail);
+                            }
                         }
 
                         // show badge only for multiple selections
