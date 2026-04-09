@@ -88,7 +88,6 @@ public class CapsuleListViewModel extends BaseViewModel {
 
         List<Capsule> mergedList = new ArrayList<>(merged.values());
         capsules.setValue(mergedList);
-        setOriginalCapsules(mergedList);
     }
 
     private void applyFilters() {
