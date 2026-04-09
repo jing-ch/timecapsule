@@ -325,6 +325,7 @@ public class CreateStepThreeActivity extends AppCompatActivity {
         capsule.setContent(message);
         capsule.setLocationName((location != null && !location.isEmpty()) ? location : null);
         capsule.setPublic(!isPrivate);
+        capsule.setSharedWithUserIds(isPrivate ? new ArrayList<>() : new ArrayList<>(selectedFriendUids));
         capsule.setUnlockTime(new Timestamp(selectedUnlockDate));
         capsule.setCreatedAt(Timestamp.now());
         capsule.setUnlocked(false);

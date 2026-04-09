@@ -103,6 +103,13 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onCapsuleLongClick(Capsule capsule) {
+                FirebaseUser currentUser = auth.getCurrentUser();
+                if (currentUser != null && !capsule.isOwnedBy(currentUser.getUid())) {
+                    Toast.makeText(MainActivity.this,
+                            "You can't delete a capsule shared with you",
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 showDeleteDialog(capsule);
             }
         });

@@ -29,6 +29,7 @@ import edu.northeastern.timecapsule.model.Capsule;
  *
  * WHAT'S AVAILABLE:
  *   fetchUserCapsules(userId)  -> Teammate B, this is yours -- loads the capsule list
+ *   fetchSharedCapsules(userId) -> loads capsules shared with the current user
  *   deleteCapsule(capsuleId)   -> Teammate B, this is yours -- for the delete dialog
  *   generateCapsuleId()                      -> Teammate C, call this first to get an ID
  *   saveCapsuleWithId(capsule, capsuleId)    -> Teammate C, this is yours -- submits the creation form
@@ -61,6 +62,20 @@ public class CapsuleRepository {
 
         db.collection(COLLECTION)
                 .whereEqualTo("userId", userId)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .addSnapshotListener((snapshot, error) -> {
+                    if (error != null || snapshot == null) return;
+                    liveData.setValue(snapshot.toObjects(Capsule.class));
+                });
+
+        return liveData;
+    }
+
+    public LiveData<List<Capsule>> fetchSharedCapsules(String userId) {
+        MutableLiveData<List<Capsule>> liveData = new MutableLiveData<>();
+
+        db.collection(COLLECTION)
+                .whereArrayContains("sharedWithUserIds", userId)
                 .orderBy("createdAt", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshot, error) -> {
                     if (error != null || snapshot == null) return;

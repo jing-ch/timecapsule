@@ -1,6 +1,7 @@
 package edu.northeastern.timecapsule.viewmodel;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.firebase.Timestamp;
@@ -8,24 +9,39 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.northeastern.timecapsule.model.Capsule;
 
 public class CapsuleListViewModel extends BaseViewModel {
 
-    private LiveData<List<Capsule>> capsules;
+    private final MediatorLiveData<List<Capsule>> capsules = new MediatorLiveData<>();
     private final MutableLiveData<List<Capsule>> filteredCapsules = new MutableLiveData<>();
     private List<Capsule> originalCapsules = new ArrayList<>();
+    private List<Capsule> ownCapsules = new ArrayList<>();
+    private List<Capsule> sharedCapsules = new ArrayList<>();
 
     public void loadCapsules() {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            capsules.setValue(new ArrayList<>());
             filteredCapsules.setValue(new ArrayList<>());
             return;
         }
 
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        capsules = repo.fetchUserCapsules(userId);
+        LiveData<List<Capsule>> ownSource = repo.fetchUserCapsules(userId);
+        LiveData<List<Capsule>> sharedSource = repo.fetchSharedCapsules(userId);
+
+        capsules.addSource(ownSource, list -> {
+            ownCapsules = list != null ? list : new ArrayList<>();
+            mergeCapsules();
+        });
+        capsules.addSource(sharedSource, list -> {
+            sharedCapsules = list != null ? list : new ArrayList<>();
+            mergeCapsules();
+        });
     }
 
     public LiveData<List<Capsule>> getCapsules() {
@@ -38,7 +54,7 @@ public class CapsuleListViewModel extends BaseViewModel {
 
     public void setOriginalCapsules(List<Capsule> list) {
         originalCapsules = list != null ? list : new ArrayList<>();
-        filteredCapsules.setValue(originalCapsules);
+        applyFilters();
     }
 
     /** "all", "locked", or "unlocked" */
@@ -53,6 +69,25 @@ public class CapsuleListViewModel extends BaseViewModel {
     public void filterByStatus(String status) {
         currentStatusFilter = status == null ? "all" : status;
         applyFilters();
+    }
+
+    private void mergeCapsules() {
+        Map<String, Capsule> merged = new LinkedHashMap<>();
+
+        for (Capsule capsule : ownCapsules) {
+            if (capsule != null && capsule.getCapsuleId() != null) {
+                merged.put(capsule.getCapsuleId(), capsule);
+            }
+        }
+
+        for (Capsule capsule : sharedCapsules) {
+            if (capsule != null && capsule.getCapsuleId() != null) {
+                merged.putIfAbsent(capsule.getCapsuleId(), capsule);
+            }
+        }
+
+        List<Capsule> mergedList = new ArrayList<>(merged.values());
+        capsules.setValue(mergedList);
     }
 
     private void applyFilters() {

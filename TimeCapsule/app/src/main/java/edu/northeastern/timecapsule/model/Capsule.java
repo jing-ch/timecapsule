@@ -26,6 +26,7 @@ public class Capsule {
     private String locationName; // nullable
     private Timestamp unlockTime;
     private boolean isPublic;
+    private List<String> sharedWithUserIds; // users allowed to view this shared capsule
     private boolean isUnlocked;
     private Timestamp createdAt;
 
@@ -61,6 +62,13 @@ public class Capsule {
 
     public boolean isPublic() { return isPublic; }
     public void setPublic(boolean isPublic) { this.isPublic = isPublic; }
+
+    public List<String> getSharedWithUserIds() { return sharedWithUserIds; }
+    public void setSharedWithUserIds(List<String> sharedWithUserIds) { this.sharedWithUserIds = sharedWithUserIds; }
+
+    public boolean isOwnedBy(String uid) {
+        return uid != null && uid.equals(userId);
+    }
 
     public boolean isUnlocked() { return isUnlocked; }
     public void setUnlocked(boolean isUnlocked) { this.isUnlocked = isUnlocked; }

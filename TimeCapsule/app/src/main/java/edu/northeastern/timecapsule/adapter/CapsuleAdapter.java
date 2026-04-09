@@ -19,6 +19,7 @@ import java.util.Locale;
 
 import edu.northeastern.timecapsule.R;
 import edu.northeastern.timecapsule.model.Capsule;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class CapsuleAdapter extends RecyclerView.Adapter<CapsuleAdapter.CapsuleViewHolder> {
 
@@ -63,6 +64,7 @@ public class CapsuleAdapter extends RecyclerView.Adapter<CapsuleAdapter.CapsuleV
 
     static class CapsuleViewHolder extends RecyclerView.ViewHolder {
         TextView titleText;
+        TextView sharedBadgeText;
         TextView unlockText;
         TextView countdownText;
         ImageView lockStatusIcon;
@@ -70,6 +72,7 @@ public class CapsuleAdapter extends RecyclerView.Adapter<CapsuleAdapter.CapsuleV
         public CapsuleViewHolder(@NonNull View itemView) {
             super(itemView);
             titleText = itemView.findViewById(R.id.tvCapsuleTitle);
+            sharedBadgeText = itemView.findViewById(R.id.tvSharedBadge);
             unlockText = itemView.findViewById(R.id.tvCapsuleUnlock);
             countdownText = itemView.findViewById(R.id.tvCountdown);
             lockStatusIcon = itemView.findViewById(R.id.ivLockStatus);
@@ -77,6 +80,12 @@ public class CapsuleAdapter extends RecyclerView.Adapter<CapsuleAdapter.CapsuleV
 
         public void bind(Capsule capsule, OnCapsuleClickListener listener) {
             titleText.setText(capsule.getTitle() != null ? capsule.getTitle() : "Untitled Capsule");
+
+            String currentUid = FirebaseAuth.getInstance().getCurrentUser() != null
+                    ? FirebaseAuth.getInstance().getCurrentUser().getUid()
+                    : null;
+            boolean isSharedWithMe = currentUid != null && !capsule.isOwnedBy(currentUid);
+            sharedBadgeText.setVisibility(isSharedWithMe ? View.VISIBLE : View.GONE);
 
             Timestamp unlockTimestamp = capsule.getUnlockTime();
             Date now = new Date();
