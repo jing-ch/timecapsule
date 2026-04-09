@@ -180,6 +180,13 @@ public class CreateStepThreeActivity extends AppCompatActivity {
                 Calendar selected = Calendar.getInstance();
                 selected.set(year, month, day, hourOfDay, minute, 0);
                 selected.set(Calendar.MILLISECOND, 0);
+                if (selected.getTimeInMillis() < System.currentTimeMillis()) {
+                    Toast.makeText(this,
+                            "Unlock time cannot be in the past",
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 selectedUnlockDate = selected.getTime();
 
                 SimpleDateFormat fmt = new SimpleDateFormat("MMM d, yyyy 'at' h:mm a", Locale.getDefault());
@@ -304,6 +311,11 @@ public class CreateStepThreeActivity extends AppCompatActivity {
 
         if (selectedUnlockDate == null) {
             viewModel.errorMessage.setValue("Please select an unlock date and time");
+            return;
+        }
+
+        if (selectedUnlockDate.getTime() < System.currentTimeMillis()) {
+            viewModel.errorMessage.setValue("Unlock time cannot be in the past");
             return;
         }
 
