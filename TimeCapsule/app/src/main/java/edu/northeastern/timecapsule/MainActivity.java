@@ -87,7 +87,6 @@ public class MainActivity extends AppCompatActivity {
         syncFcmToken(currentUser);
 
         Button btnCreateCapsule = findViewById(R.id.btnCreateCapsule);
-        Button btnFriends = findViewById(R.id.btnFriends);
         EditText etSearch = findViewById(R.id.etSearch);
         RecyclerView recyclerView = findViewById(R.id.recyclerViewCapsules);
 
@@ -162,10 +161,6 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(MainActivity.this, CreateStepOneActivity.class));
         });
 
-        btnFriends.setOnClickListener(v -> {
-            startActivity(new Intent(MainActivity.this, FriendsActivity.class));
-        });
-
         handleNotificationIntent(getIntent());
 
         countdownHandler.postDelayed(countdownRunnable, 30_000);
@@ -179,6 +174,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_friends) {
+            startActivity(new Intent(this, FriendsActivity.class));
+            return true;
+        }
         if (item.getItemId() == R.id.action_logout) {
             auth.signOut();
             goToLogin();

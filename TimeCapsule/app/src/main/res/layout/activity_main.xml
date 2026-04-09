@@ -97,11 +97,4 @@
         android:textColor="#4A3F8C"
         android:backgroundTint="#D6C8FF" />
 
-    <Button
-        android:id="@+id/btnFriends"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Friends"
-        android:layout_marginTop="8dp"/>
-
 </LinearLayout>
