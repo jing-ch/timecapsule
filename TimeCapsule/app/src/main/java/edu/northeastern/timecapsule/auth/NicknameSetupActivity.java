@@ -35,8 +35,6 @@ public class NicknameSetupActivity extends AppCompatActivity {
             return;
         }
 
-        binding.etEmail.setText(user.getEmail());
-
         binding.btnConfirm.setOnClickListener(v -> {
             String nickname = binding.etNickname.getText() != null
                     ? binding.etNickname.getText().toString().trim()

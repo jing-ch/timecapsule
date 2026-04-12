@@ -1,51 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFF8FD"
     android:gravity="center_vertical"
     android:orientation="vertical"
-    android:padding="24dp">
+    android:padding="28dp">
+
+    <ImageView
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="20dp"
+        android:contentDescription="App icon"
+        android:src="@mipmap/ic_launcher" />
 
     <TextView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_gravity="center_horizontal"
         android:gravity="center"
-        android:text="Choose a Nickname"
-        android:textSize="28sp"
+        android:text="Welcome to Time Capsule!"
+        android:textColor="#222222"
+        android:textSize="26sp"
         android:textStyle="bold" />
 
     <TextView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="40dp"
         android:gravity="center"
-        android:text="This is how friends will see you"
+        android:text="Choose a nickname\nThis is how your friends will see you"
         android:textColor="#777777"
         android:textSize="14sp" />
-
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:hint="Email">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etEmail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:inputType="textEmailAddress" />
-    </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:id="@+id/tilNickname"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="28dp"
         android:hint="Nickname (max 15 characters)">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -59,7 +55,12 @@
     <Button
         android:id="@+id/btnConfirm"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Continue" />
+        android:layout_height="52dp"
+        android:backgroundTint="#7B2FF7"
+        android:text="Let's Go"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:textStyle="bold" />
 
 </LinearLayout>
