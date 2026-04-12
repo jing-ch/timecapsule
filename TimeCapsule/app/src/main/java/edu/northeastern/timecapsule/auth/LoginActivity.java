@@ -7,6 +7,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import edu.northeastern.timecapsule.MainActivity;
 import edu.northeastern.timecapsule.databinding.ActivityLoginBinding;
 
@@ -14,6 +17,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private ActivityLoginBinding binding;
     private AuthViewModel viewModel;
+    private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,14 +27,14 @@ public class LoginActivity extends AppCompatActivity {
 
         viewModel = new ViewModelProvider(this).get(AuthViewModel.class);
 
-        // If already logged in, skip to main
+        // If already logged in, check nickname and route
         if (viewModel.getCurrentUser() != null) {
-            goToMain();
+            checkAndRoute(viewModel.getCurrentUser());
             return;
         }
 
         viewModel.currentUser.observe(this, user -> {
-            if (user != null) goToMain();
+            if (user != null) checkAndRoute(user);
         });
 
         viewModel.errorMessage.observe(this, msg ->
@@ -52,8 +56,23 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(new Intent(this, RegisterActivity.class)));
     }
 
-    private void goToMain() {
-        startActivity(new Intent(this, MainActivity.class));
-        finish();
+    private void checkAndRoute(FirebaseUser user) {
+        firestore.collection("users").document(user.getUid()).get()
+                .addOnSuccessListener(doc -> {
+                    String displayName = doc.exists() ? doc.getString("displayName") : null;
+                    boolean needsNickname = displayName == null
+                            || displayName.trim().isEmpty()
+                            || (user.getEmail() != null && displayName.equalsIgnoreCase(user.getEmail()));
+                    if (needsNickname) {
+                        startActivity(new Intent(this, NicknameSetupActivity.class));
+                    } else {
+                        startActivity(new Intent(this, MainActivity.class));
+                    }
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    startActivity(new Intent(this, MainActivity.class));
+                    finish();
+                });
     }
 }
