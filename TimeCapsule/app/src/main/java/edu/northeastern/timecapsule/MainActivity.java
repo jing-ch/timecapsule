@@ -39,6 +39,7 @@ import java.util.Map;
 import edu.northeastern.timecapsule.adapter.CapsuleAdapter;
 import edu.northeastern.timecapsule.auth.LoginActivity;
 import edu.northeastern.timecapsule.model.Capsule;
+import edu.northeastern.timecapsule.ui.account.MyAccountActivity;
 import edu.northeastern.timecapsule.ui.create.CreateStepOneActivity;
 import edu.northeastern.timecapsule.ui.friends.FriendsActivity;
 import edu.northeastern.timecapsule.ui.read.CapsuleDetailActivity;
@@ -83,6 +84,10 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        initUi(currentUser);
+    }
+
+    private void initUi(FirebaseUser currentUser) {
         requestNotificationPermissionIfNeeded();
         syncFcmToken(currentUser);
 
@@ -102,8 +107,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onCapsuleLongClick(Capsule capsule) {
-                FirebaseUser currentUser = auth.getCurrentUser();
-                if (currentUser != null && !capsule.isOwnedBy(currentUser.getUid())) {
+                FirebaseUser user = auth.getCurrentUser();
+                if (user != null && !capsule.isOwnedBy(user.getUid())) {
                     Toast.makeText(MainActivity.this,
                             "You can't delete a capsule shared with you",
                             Toast.LENGTH_SHORT).show();
@@ -174,6 +179,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_my_account) {
+            startActivity(new Intent(this, MyAccountActivity.class));
+            return true;
+        }
         if (item.getItemId() == R.id.action_friends) {
             startActivity(new Intent(this, FriendsActivity.class));
             return true;
@@ -200,27 +209,30 @@ public class MainActivity extends AppCompatActivity {
     private void syncFcmToken(FirebaseUser user) {
         FirebaseMessaging.getInstance().getToken()
                 .addOnSuccessListener(token -> {
-                    Map<String, Object> updates = new HashMap<>();
+                    firestore.collection("users").document(user.getUid()).get()
+                            .addOnSuccessListener(doc -> {
+                                Map<String, Object> updates = new HashMap<>();
 
-                    if (user.getEmail() != null) {
-                        updates.put("email", user.getEmail());
-                    }
+                                if (user.getEmail() != null) {
+                                    updates.put("email", user.getEmail());
+                                }
 
-                    String displayName = user.getDisplayName();
-                    if (displayName == null || displayName.trim().isEmpty()) {
-                        displayName = user.getEmail() != null ? user.getEmail() : "Unknown User";
-                    }
-                    updates.put("displayName", displayName);
+                                String existingName = doc.exists() ? doc.getString("displayName") : null;
+                                if (existingName == null || existingName.trim().isEmpty()) {
+                                    updates.put("displayName", user.getEmail() != null ? user.getEmail() : "User");
+                                }
 
-                    if (token != null && !token.isEmpty()) {
-                        updates.put("fcmToken", token);
-                    }
+                                if (token != null && !token.isEmpty()) {
+                                    updates.put("fcmToken", token);
+                                }
 
-                    firestore.collection("users")
-                            .document(user.getUid())
-                            .set(updates, SetOptions.merge());
+                                firestore.collection("users")
+                                        .document(user.getUid())
+                                        .set(updates, SetOptions.merge());
+                            });
                 });
     }
+
 
     private void requestNotificationPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {

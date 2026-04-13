@@ -7,7 +7,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
-import edu.northeastern.timecapsule.MainActivity;
 import edu.northeastern.timecapsule.databinding.ActivityRegisterBinding;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -53,7 +52,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void goToMain() {
-        startActivity(new Intent(this, MainActivity.class));
+        startActivity(new Intent(this, NicknameSetupActivity.class));
         finishAffinity(); // clear both RegisterActivity and LoginActivity from back stack
     }
 }

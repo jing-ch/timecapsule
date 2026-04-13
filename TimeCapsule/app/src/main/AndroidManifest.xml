@@ -50,6 +50,10 @@
             android:exported="false" />
         <activity android:name=".ui.friends.FriendsActivity"
             android:exported="false" />
+        <activity android:name=".ui.account.MyAccountActivity"
+            android:exported="false" />
+        <activity android:name=".auth.NicknameSetupActivity"
+            android:exported="false" />
         <activity
             android:name=".CreateActivity"
             android:exported="false" />
