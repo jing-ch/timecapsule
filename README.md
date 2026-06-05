@@ -17,17 +17,11 @@ Time Capsule lets you bundle text, images, and videos into a capsule and seal it
 
 **▶ [Watch the demo video](https://youtu.be/qCn4zFBbpJ4)**
 
-<!-- TODO: Add your screenshots / GIF here. Suggested captures:
-     1. Capsule list with locked + unlocked cards and the search/filter bar
-     2. The 3-step create flow
-     3. A locked capsule showing the live countdown
-     4. An unlocked capsule detail view with media
-     5. Friends / sharing screen
--->
-
-| Capsule List | Create Flow | Locked Countdown | Unlocked Detail |
-| :---: | :---: | :---: | :---: |
-| _screenshot_ | _screenshot_ | _screenshot_ | _screenshot_ |
+| Capsule List | Create — Media & Title | Create — Unlock & Privacy |
+| :---: | :---: | :---: |
+| <img src="docs/screenshots/capsule_list.png" width="240"> | <img src="docs/screenshots/create_capsule_1.png" width="240"> | <img src="docs/screenshots/create_capsule_2.png" width="240"> |
+| **Locked Countdown** | **Unlocked Detail** | |
+| <img src="docs/screenshots/locked_countdown.png" width="240"> | <img src="docs/screenshots/unlocked_detail.png" width="240"> | |
 
 ---
 
@@ -121,7 +115,9 @@ timecapsule/
 │       ├── notifications/               # MyFirebaseMessagingService (FCM)
 │       └── utils/                       # LocationHelper, DateUtils, ErrorHandler
 ├── functions/                           # Cloud Function: scheduled unlock notifications
-└── docs/                                # Product spec: tech stack, user flow
+└── docs/
+    ├── screenshots/                     # App screenshots used in this README
+    └── *.md                             # Product spec: tech stack, user flow
 ```
 
 ---
